@@ -16,6 +16,9 @@ concurrency:
   group: fc-main
   cancel-in-progress: true
 
+env:
+  FC_IMAGE_REPOSITORY: ghcr.io/${{ github.repository_owner }}/federated-catalog
+
 jobs:
   # ------------------------------
   # 1. BUILD & PUSH FC DOCKER IMAGE
@@ -59,7 +62,7 @@ jobs:
       - name: Set dynamic tags for Federated Catalog
         id: vars
         run: |
-          IMAGE_BASE_FC="ghcr.io/wake-ua/federated-catalog"
+          IMAGE_BASE_FC="${FC_IMAGE_REPOSITORY}"
           DATE=$(date +%Y%m%d)
           SHA_SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
 
@@ -91,7 +94,7 @@ jobs:
       contents: read
 
     env:
-      FC_WEB_PORT: ${{ vars.FC_PORT || '26002' }}
+      FC_WEB_PORT: ${{ vars.FC_PORT }}
 
     steps:
       - name: Configure SSH
@@ -108,6 +111,6 @@ jobs:
           ssh -p "${FC_WEB_PORT}" -i ~/.ssh/deploy_key gh_docker_deploy@${{ secrets.FC_HOST }} "
             export FC_IMAGE_TAG=${SHA_SHORT} &&
 
-            docker pull ghcr.io/wake-ua/federated-catalog:${SHA_SHORT} &&
+            docker pull ${FC_IMAGE_REPOSITORY}:${SHA_SHORT} &&
             docker stack deploy -c /home/gh_docker_deploy/despliegue/docker-stack-catalog.yml federated-catalog
           "
