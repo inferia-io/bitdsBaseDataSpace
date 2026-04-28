@@ -93,7 +93,9 @@ jobs:
       contents: read
 
     env:
-      FC_PORT: ${{ vars.FC_PORT }}
+      FC_PORT: ${{ vars.FC_PORT || '26002' }}
+      GHCR_USER: ${{ secrets.GHCR_USER }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
     steps:
       - name: Configure SSH
@@ -107,9 +109,10 @@ jobs:
         run: |
           SHA_SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
 
-          ssh -p "${FC_PORT}" -i ~/.ssh/deploy_key gh_docker_deploy@${{ secrets.FC_HOST }} "
+          printf '%s' "${GHCR_TOKEN}" | ssh -p "${FC_PORT}" -i ~/.ssh/deploy_key gh_docker_deploy@${{ secrets.FC_HOST }} "
+            docker login ghcr.io -u '${GHCR_USER}' --password-stdin &&
             export FC_IMAGE_TAG=${SHA_SHORT} &&
 
             docker pull ${FC_IMAGE_REPOSITORY}:${SHA_SHORT} &&
-            docker stack deploy -c /home/gh_docker_deploy/despliegue/docker-stack-catalog.yml federated-catalog
+            docker stack deploy --with-registry-auth -c /home/gh_docker_deploy/despliegue/docker-stack-catalog.yml federated-catalog
           "
