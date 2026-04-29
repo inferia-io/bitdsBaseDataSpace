@@ -12,7 +12,7 @@ services:
     ports:
       - "27018:27017"
     volumes:
-      - /srv/data/mongodb:/data/db
+      - mongodb_data:/data/db
     environment:
       MONGODB_INITDB_ROOT_USERNAME: "wake"
       MONGODB_INITDB_ROOT_PASSWORD: "VERY_SECRET_PASSWORD"
@@ -39,3 +39,6 @@ services:
       "-jar", "/federated-catalog.jar",
       "--log-level=DEBUG"
     ]
+
+volumes:
+  mongodb_data:
