@@ -1,4 +1,4 @@
-name: Build and Publish Federated Catalog Image (Main)
+name: Build and Publish Federated Catalog Image
 
 on:
   push:
